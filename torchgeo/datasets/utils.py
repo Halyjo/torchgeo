@@ -29,6 +29,7 @@ from torchvision.datasets.utils import (
     extract_archive,
 )
 from torchvision.utils import draw_segmentation_masks
+from shapely.geometry import Polygon
 
 from .errors import DependencyNotFoundError
 
@@ -204,6 +205,20 @@ class BoundingBox:
         .. versionadded:: 0.3
         """
         return self.area * (self.maxt - self.mint)
+
+    @property
+    def as_polygon(self) -> Polygon:
+        """Convert the bounding box to a Shapely polygon."""
+        return Polygon([
+            (self.minx, self.miny), 
+            (self.minx, self.maxy),
+            (self.maxx, self.maxy), 
+            (self.maxx, self.miny)
+        ])
+
+    def intersects_polygon(self, polygon: Polygon) -> bool:
+        """Check if the bounding box intersects a given polygon."""
+        return self.as_polygon.intersects(polygon)
 
     def intersects(self, other: BoundingBox) -> bool:
         """Whether or not two bounding boxes intersect.
